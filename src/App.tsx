@@ -3,12 +3,19 @@ import logo from './logo.svg';
 import './App.css';
 
 function App() {
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.value);
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        哈哈哈
+        <input onChange={handleInputChange} />
+        <button>添加</button>
       </header>
+      {}
     </div>
   );
 }

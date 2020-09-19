@@ -77,8 +77,10 @@ function getUnexpectedStateShapeWarningMessage(
 function assertReducerShape(reducers: ReducersMapObject) {
   Object.keys(reducers).forEach(key => {
     const reducer = reducers[key]
+    // reducer返回值
     const initialState = reducer(undefined, { type: ActionTypes.INIT })
 
+    // undefined throw Error
     if (typeof initialState === 'undefined') {
       throw new Error(
         `Reducer "${key}" returned undefined during initialization. ` +
@@ -124,6 +126,7 @@ function assertReducerShape(reducers: ReducersMapObject) {
  * @returns A reducer function that invokes every reducer inside the passed
  *   object, and builds a state object with the same shape.
  */
+
 export default function combineReducers<S>(
   reducers: ReducersMapObject<S, any>
 ): Reducer<CombinedState<S>>
@@ -136,46 +139,63 @@ export default function combineReducers<M extends ReducersMapObject>(
   CombinedState<StateFromReducersMapObject<M>>,
   ActionFromReducersMapObject<M>
 >
+// 用于合并reducer 一般是这样combineReducers({a,b,c})
 export default function combineReducers(reducers: ReducersMapObject) {
+  // reducers中key的数组
   const reducerKeys = Object.keys(reducers)
+  // 最终的reducer
   const finalReducers: ReducersMapObject = {}
+
+  // 循环， 目的为了给finalReducers赋值， 过虑了不符合规范的reducer
   for (let i = 0; i < reducerKeys.length; i++) {
+    // 接受当前的key
     const key = reducerKeys[i]
 
+    // 如果不是生产环境， 当前的reducer是undefined会给出warning
     if (process.env.NODE_ENV !== 'production') {
       if (typeof reducers[key] === 'undefined') {
         warning(`No reducer provided for key "${key}"`)
       }
     }
 
+    // reducer要是一个function
     if (typeof reducers[key] === 'function') {
+      // 赋值给finalReducers
       finalReducers[key] = reducers[key]
     }
   }
+  // 符合规范的reducer的key数组
   const finalReducerKeys = Object.keys(finalReducers)
 
   // This is used to make sure we don't warn about the same
   // keys multiple times.
+  // 意想不到的key， 先往下看看
   let unexpectedKeyCache: { [key: string]: true }
+  // production环境为{}
   if (process.env.NODE_ENV !== 'production') {
     unexpectedKeyCache = {}
   }
 
   let shapeAssertionError: Error
   try {
+    // 看这个function
     assertReducerShape(finalReducers)
   } catch (e) {
     shapeAssertionError = e
   }
 
+  // 返回function， 即为createStore中的reducer参数既currentReducer
+  // 自然有state和action两个参数， 可以回createStore文件看看currentReducer(currentState, action)
   return function combination(
     state: StateFromReducersMapObject<typeof reducers> = {},
     action: AnyAction
   ) {
+    // reducer不规范报错
     if (shapeAssertionError) {
       throw shapeAssertionError
     }
 
+    // 比较细致的❌信息，顺便看了一下getUndefinedStateErrorMessage，都是用于提示warning和error的， 不过多解释了
     if (process.env.NODE_ENV !== 'production') {
       const warningMessage = getUnexpectedStateShapeWarningMessage(
         state,
@@ -191,19 +211,41 @@ export default function combineReducers(reducers: ReducersMapObject) {
     let hasChanged = false
     const nextState: StateFromReducersMapObject<typeof reducers> = {}
     for (let i = 0; i < finalReducerKeys.length; i++) {
+
+      // 获取finalReducerKeys的key和value（function）
       const key = finalReducerKeys[i]
       const reducer = finalReducers[key]
+      // 当前key的state值
       const previousStateForKey = state[key]
+      // 执行reducer， 返回当前state
       const nextStateForKey = reducer(previousStateForKey, action)
+      // 不存在返回值报错
       if (typeof nextStateForKey === 'undefined') {
         const errorMessage = getUndefinedStateErrorMessage(key, action)
         throw new Error(errorMessage)
       }
+      // 新的state放在nextState对应的key里
       nextState[key] = nextStateForKey
+      // 判断新的state是不是同一引用， 以检验reducer是不是纯函数
       hasChanged = hasChanged || nextStateForKey !== previousStateForKey
     }
     hasChanged =
       hasChanged || finalReducerKeys.length !== Object.keys(state).length
+      // 改变了返回nextState
     return hasChanged ? nextState : state
   }
+  /*
+  *  新版本的redux这部分改变了实现方法
+  *  老版本的redux使用的reduce函数实现的
+  *  简单例子如下
+  * function combineReducers(reducers) {
+  *    return (state = {}, action) => {
+  *        return Object.keys(reducers).reduce((currentState, key) => {
+  *            currentState[key] = reducers[key](state[key], action);
+  *             return currentState;
+  *         }, {})
+  *      };
+  *    }
+  * 
+  * */
 }
