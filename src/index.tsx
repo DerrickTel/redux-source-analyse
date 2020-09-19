@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 import { Provider } from './react-redux'
 import { createStore, applyMiddleware } from './redux'
@@ -16,14 +16,12 @@ const logger = (store:any) => (next:any) => (action:any) => {
   return result
 }
 
-let store = createStore(rootReducer, applyMiddleware(logger));
+let store = createStore(rootReducer, {todos:[]}, applyMiddleware(logger));
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>,
+  <Provider store={store}>
+    <App />
+  </Provider>,
   document.getElementById('root')
 );
 

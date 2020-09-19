@@ -84,11 +84,23 @@ export default function createStore<
     enhancer = preloadedState as StoreEnhancer<Ext, StateExt>
     preloadedState = undefined
   }
-
+  // debugger
+  // 如果参数enhancer存在
   if (typeof enhancer !== 'undefined') {
+    // 如果enhancer存在，那他必须是个function, 否则throw Error哈
     if (typeof enhancer !== 'function') {
       throw new Error('Expected the enhancer to be a function.')
     }
+    /**
+     * 传入符合参数类型的参数，就可以执行 enhancer,
+     * 但是这个return深深的吸引了我, 因为说明有applyMiddleware的时候后面的都不用看了 ??? 当然不可能
+     * 可是applyMiddleware其实是必用项，所以猜想一下applyMiddleware强化store之后会enhancer赋值undefined，再次调用createStore
+     * 上下打个debugger看一下执行顺序(debugger位置以注释)，果然不出所料
+     * 好了， 假设我们还不知道applyMiddleware()这个funcrion具体干了什么，
+     * 只知道他做了一些处理然后重新调用了createStore并且enhancer参数为undefined
+     * 先记下，后续在看applyMiddleware， 因为我们现在要看的是createStore
+     * * */
+    // debugger
 
     return enhancer(createStore)(
       reducer,
