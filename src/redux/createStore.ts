@@ -177,12 +177,12 @@ export default function createStore<
    @returns A function to remove this change listener.
    */
   function subscribe(listener: () => void) {
-    // listener必须为函数
+    // listener必须为函数，因为要以回调函数的方式来触发。
     if (typeof listener !== 'function') {
       throw new Error('Expected the listener to be a function.')
     }
 
-    // 如果正在dispatch中则抛错
+    // 如果正在dispatch中则抛错，和getState同理
     if (isDispatching) {
       throw new Error(
         'You may not call store.subscribe() while the reducer is executing. ' +
@@ -207,7 +207,7 @@ export default function createStore<
         return
       }
 
-      // 如果正在dispatch 报错
+      // 如果正在dispatch 报错，和上面👆同理
       if (isDispatching) {
         throw new Error(
           'You may not unsubscribe from a store listener while the reducer is executing. ' +
@@ -218,7 +218,7 @@ export default function createStore<
       // 取消订阅
       isSubscribed = false
 
-      // 依旧是拿下当前的监听队列
+      // 依旧是拿下当前的监听队列，不然等一下删除的时候，会删掉所有的队列。其实我们只需要删掉监听者就好了
       ensureCanMutateNextListeners()
       // 找到监听者
       const index = nextListeners.indexOf(listener)
@@ -316,6 +316,7 @@ export default function createStore<
     }
 
     // 修改reducer
+    // 当前的currentReducer更新为参数nextReducer
     // TODO: do this more elegantly
     ;((currentReducer as unknown) as Reducer<
       NewState,
@@ -326,6 +327,8 @@ export default function createStore<
     // Any reducers that existed in both the new and old rootReducer
     // will receive the previous state. This effectively populates
     // the new state tree with any relevant data from the old one.
+    // 和INIT的dispatch相同，发送一个dispatch初始化state，表明一下是REPLACE
+    // 自己👀看一下utils方法的ActionTypes， 随性的随机数
     dispatch({ type: ActionTypes.REPLACE } as A)
     // change the type of the store by casting it to the new store
     return (store as unknown) as Store<
@@ -360,6 +363,7 @@ export default function createStore<
           throw new TypeError('Expected the observer to be an object.')
         }
 
+        //获取观察着的状态
         function observeState() {
           const observerAsObserver = observer as Observer<S>
           if (observerAsObserver.next) {
@@ -368,6 +372,7 @@ export default function createStore<
         }
 
         observeState()
+        //返回取消订阅的方法
         const unsubscribe = outerSubscribe(observeState)
         return { unsubscribe }
       },

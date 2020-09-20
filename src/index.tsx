@@ -11,12 +11,20 @@ import rootReducer from './reducers'
 const logger = (store:any) => (next:any) => (action:any) => {
   // debugger
   console.info('dispatching', action)
-  let result = next(action);
+  const result = next(action);
   console.log('next state', store.getState())
   return result
 }
 
-let store = createStore(rootReducer, {todos:[]}, applyMiddleware(logger));
+const store = createStore(rootReducer, {todos:[]}, applyMiddleware(logger));
+
+const unSubscribe = store.subscribe(() => {
+  console.log('store.subscribe', store.getState())
+})
+store.subscribe(() => {
+  console.log('store.subscribe2', store.getState())
+})
+// unSubscribe();
 
 ReactDOM.render(
   <Provider store={store}>

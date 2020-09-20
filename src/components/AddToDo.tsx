@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { connect } from '../react-redux'
 import { addTodo } from '../actions'
+import reducer from '../reducers/index'
 
 const AddTodo = (props:any) => {
   
@@ -10,6 +11,7 @@ const AddTodo = (props:any) => {
 
   const submit = () => {
     props.dispatch(addTodo(value))
+    // reducer({todos:[]},'ADD_TODO')
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
