@@ -5,7 +5,7 @@ import reducer from '../reducers/index'
 
 const AddTodo = (props:any) => {
   
-  const [value,setValue] = useState('')
+  const [value, setValue] = useState('')
 
   console.log(props)
 

@@ -5,16 +5,16 @@ const TodoList = (props:any) => {
   console.log(props)
   return(
   <ul>
-    {props.todos.map((todo:any) => (
+    {/* {props.todos.map((todo:any) => (
       <div key={todo.id}>
         {todo.name}
       </div>
-    ))}
+    ))} */}
   </ul>
 )}
 
 export default connect((state:any)=>{
-  console.log(state)
+  console.log('todoList',state)
   // debugger
   return {
     // todos: state.firstReducer.todos

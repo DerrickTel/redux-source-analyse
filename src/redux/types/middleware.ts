@@ -3,6 +3,7 @@ import { Dispatch } from './store'
 export interface MiddlewareAPI<D extends Dispatch = Dispatch, S = any> {
   dispatch: D
   getState(): S
+  test: number
 }
 
 /**

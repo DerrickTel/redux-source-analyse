@@ -10,13 +10,30 @@ import rootReducer from './reducers'
 // middleware
 const logger = (store:any) => (next:any) => (action:any) => {
   // debugger
+  
+  console.log(store)
+  console.log('next===',next)
+  console.log(action)
+  console.info('dispatching', action)
+  action.aa = 2
+  const result = next(action);
+  console.log('next state', store.getState())
+  return result
+}
+
+const logger2 = (store:any) => (next:any) => (action:any) => {
+  // debugger
+  
+  console.log(store)
+  console.log('next2===',next)
+  console.log('logger2==-=-=-=-=-=-=',action)
   console.info('dispatching', action)
   const result = next(action);
   console.log('next state', store.getState())
   return result
 }
 
-const store = createStore(rootReducer, {todos:[]}, applyMiddleware(logger));
+const store = createStore(rootReducer, {firstReducer:{todos:[]}}, applyMiddleware(logger, logger2));
 
 const unSubscribe = store.subscribe(() => {
   console.log('store.subscribe', store.getState())

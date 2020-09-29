@@ -71,12 +71,17 @@ export default function bindActionCreators(
     )
   }
 
+  // 定义return 的props
   const boundActionCreators: ActionCreatorsMapObject = {}
   for (const key in actionCreators) {
+    // actionCreators的key 通常为actionCreators function的name（方法名）
     const actionCreator = actionCreators[key]
+    // function => actionCreators工厂方法本身
     if (typeof actionCreator === 'function') {
+      // 参数为{actions：function xxx}是返回相同的类型
       boundActionCreators[key] = bindActionCreator(actionCreator, dispatch)
     }
   }
+  // return 的props
   return boundActionCreators
 }

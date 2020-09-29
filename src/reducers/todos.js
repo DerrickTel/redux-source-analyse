@@ -3,6 +3,7 @@ const initState = {
 }
 
 const todos = (state = initState, action) => {
+  console.log('reducer的action', action);
   switch (action.type) {
     case 'ADD_TODO':
       return {

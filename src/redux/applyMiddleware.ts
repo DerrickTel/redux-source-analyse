@@ -28,35 +28,35 @@ import { Reducer } from './types/reducers'
  * @template Ext Dispatch signature added by a middleware.
  * @template S The type of the state supported by a middleware.
  */
-export default function applyMiddleware(): StoreEnhancer
-export default function applyMiddleware<Ext1, S>(
-  middleware1: Middleware<Ext1, S, any>
-): StoreEnhancer<{ dispatch: Ext1 }>
-export default function applyMiddleware<Ext1, Ext2, S>(
-  middleware1: Middleware<Ext1, S, any>,
-  middleware2: Middleware<Ext2, S, any>
-): StoreEnhancer<{ dispatch: Ext1 & Ext2 }>
-export default function applyMiddleware<Ext1, Ext2, Ext3, S>(
-  middleware1: Middleware<Ext1, S, any>,
-  middleware2: Middleware<Ext2, S, any>,
-  middleware3: Middleware<Ext3, S, any>
-): StoreEnhancer<{ dispatch: Ext1 & Ext2 & Ext3 }>
-export default function applyMiddleware<Ext1, Ext2, Ext3, Ext4, S>(
-  middleware1: Middleware<Ext1, S, any>,
-  middleware2: Middleware<Ext2, S, any>,
-  middleware3: Middleware<Ext3, S, any>,
-  middleware4: Middleware<Ext4, S, any>
-): StoreEnhancer<{ dispatch: Ext1 & Ext2 & Ext3 & Ext4 }>
-export default function applyMiddleware<Ext1, Ext2, Ext3, Ext4, Ext5, S>(
-  middleware1: Middleware<Ext1, S, any>,
-  middleware2: Middleware<Ext2, S, any>,
-  middleware3: Middleware<Ext3, S, any>,
-  middleware4: Middleware<Ext4, S, any>,
-  middleware5: Middleware<Ext5, S, any>
-): StoreEnhancer<{ dispatch: Ext1 & Ext2 & Ext3 & Ext4 & Ext5 }>
-export default function applyMiddleware<Ext, S = any>(
-  ...middlewares: Middleware<any, S, any>[]
-): StoreEnhancer<{ dispatch: Ext }>
+// export default function applyMiddleware(): StoreEnhancer
+// export default function applyMiddleware<Ext1, S>(
+//   middleware1: Middleware<Ext1, S, any>
+// ): StoreEnhancer<{ dispatch: Ext1 }>
+// export default function applyMiddleware<Ext1, Ext2, S>(
+//   middleware1: Middleware<Ext1, S, any>,
+//   middleware2: Middleware<Ext2, S, any>
+// ): StoreEnhancer<{ dispatch: Ext1 & Ext2 }>
+// export default function applyMiddleware<Ext1, Ext2, Ext3, S>(
+//   middleware1: Middleware<Ext1, S, any>,
+//   middleware2: Middleware<Ext2, S, any>,
+//   middleware3: Middleware<Ext3, S, any>
+// ): StoreEnhancer<{ dispatch: Ext1 & Ext2 & Ext3 }>
+// export default function applyMiddleware<Ext1, Ext2, Ext3, Ext4, S>(
+//   middleware1: Middleware<Ext1, S, any>,
+//   middleware2: Middleware<Ext2, S, any>,
+//   middleware3: Middleware<Ext3, S, any>,
+//   middleware4: Middleware<Ext4, S, any>
+// ): StoreEnhancer<{ dispatch: Ext1 & Ext2 & Ext3 & Ext4 }>
+// export default function applyMiddleware<Ext1, Ext2, Ext3, Ext4, Ext5, S>(
+//   middleware1: Middleware<Ext1, S, any>,
+//   middleware2: Middleware<Ext2, S, any>,
+//   middleware3: Middleware<Ext3, S, any>,
+//   middleware4: Middleware<Ext4, S, any>,
+//   middleware5: Middleware<Ext5, S, any>
+// ): StoreEnhancer<{ dispatch: Ext1 & Ext2 & Ext3 & Ext4 & Ext5 }>
+// export default function applyMiddleware<Ext, S = any>(
+//   ...middlewares: Middleware<any, S, any>[]
+// ): StoreEnhancer<{ dispatch: Ext }>
 export default function applyMiddleware(
   ...middlewares: Middleware[]
 ): StoreEnhancer<any> {
@@ -64,7 +64,9 @@ export default function applyMiddleware(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>
   ) => {
+    // 保存createStore(reducer, initstate) || createStore(reducer), 赋值给store
     const store = createStore(reducer, preloadedState)
+    // 这句代码的意思就是在构建中间件的过程不可以调用dispatch函数，否则会抛出异常
     let dispatch: Dispatch = () => {
       throw new Error(
         'Dispatching while constructing your middleware is not allowed. ' +
@@ -74,7 +76,9 @@ export default function applyMiddleware(
 
     const middlewareAPI: MiddlewareAPI = {
       getState: store.getState,
-      dispatch: (action, ...args) => dispatch(action, ...args)
+      dispatch: (action, ...args) => dispatch(action, ...args),
+      // 个人加的,源码没有
+      test:2,
     }
     const chain = middlewares.map(middleware => middleware(middlewareAPI))
     dispatch = compose<typeof dispatch>(...chain)(store.dispatch)
